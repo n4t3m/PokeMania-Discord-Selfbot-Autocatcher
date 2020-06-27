@@ -5,6 +5,7 @@ import setup
 import json
 import asyncio
 import random
+import sys
 
 TOKEN = setup.TOK
 client = commands.Bot(command_prefix='!', self_bot=True, fetch_offline_members=False)
@@ -13,10 +14,12 @@ PREFIX = setup.PREFIX
 DELAY = setup.DELAY
 SELFBOT_UID = setup.SELFBOT_UID
 OWNER_UID = setup.OWNER_UID
+BALL_TYPE = setup.BALL_TYPE
 client.MONEY = 0
 client.last_catch_attempt = ""
 client.captured = []
 client.escape = []
+
 
 @client.event
 async def on_ready():
@@ -45,9 +48,10 @@ async def on_message(message):
                 name = split[0]
                 if split[1] == "alola":
                     name = "alolan " + name
+                if split[1] == "galar":
+                    name = "galarian " + name
             if name == "flabebe":
                 name = "flabébé"
-            print(name)
             await message.channel.send(PREFIX + "catch " + name)
             client.last_catch_attempt = PREFIX + "catch " + name
             return
@@ -67,7 +71,10 @@ async def on_message(message):
         return
 
     if message.author.id == 627952266455941121 and "pokemon has escaped from" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        escaped = client.last_catch_attempt.split(' ')[1]
+        arr = client.last_catch_attempt.split(' ')
+        escaped = ""
+        for i in range(1, len(arr)):
+            escaped = escaped + arr[i]
         print("Attemped to catch " + escaped.capitalize() + " but it escaped...")
         client.last_catch_attempt = ""
         client.escape.append(escaped.capitalize())
@@ -115,6 +122,7 @@ def updateWebpage():
 
 
     
-    
+if BALL_TYPE != "POKEBALL" and BALL_TYPE != "GREATBALL" and BALL_TYPE != "ULTRABALL":
+    sys.exit("Pokeball Type Not Configured or Incorrectly Configured")  
 print("logging in")
 client.run(TOKEN, bot=False)
