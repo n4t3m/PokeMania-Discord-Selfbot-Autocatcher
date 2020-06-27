@@ -15,15 +15,18 @@ DELAY = setup.DELAY
 SELFBOT_UID = setup.SELFBOT_UID
 OWNER_UID = setup.OWNER_UID
 BALL_TYPE = setup.BALL_TYPE
+BUY_BALL_AMOUNT = setup.BUY_BALL_AMOUNT
 client.MONEY = 0
 client.last_catch_attempt = ""
 client.captured = []
 client.escape = []
+client.catch_type = ""
+
 
 
 @client.event
 async def on_ready():
-    print("we made it here")
+    client.catch_type = determinePokeball()
     print('We have logged in as {0.user}'.format(client))
     game = discord.Game("azunyan <3")
     await client.change_presence(status=discord.Status.online, activity=game)
@@ -52,13 +55,31 @@ async def on_message(message):
                     name = "galarian " + name
             if name == "flabebe":
                 name = "flabébé"
-            await message.channel.send(PREFIX + "catch " + name)
-            client.last_catch_attempt = PREFIX + "catch " + name
+            await message.channel.send(PREFIX + client.catch_type + " " + name)
+            client.last_catch_attempt = PREFIX + client.catch_type + " " + name
             return
     except Exception as ex:
             pass
+    
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any ultra balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+        await asyncio.sleep(2)
+        await message.channel.send(PREFIX + "buy ball ultraball " + str(BUY_BALL_AMOUNT))
+        await asyncio.sleep(2)
+        await message.channel.send(client.last_catch_attempt)
 
-    if message.author.id == 627952266455941121 and "Congratulations" in message.embeds[0].description and "You caught a" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any great balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+        await asyncio.sleep(2)
+        await message.channel.send(PREFIX + "buy ball greatball " + str(BUY_BALL_AMOUNT))
+        await asyncio.sleep(2)
+        await message.channel.send(client.last_catch_attempt)
+
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any pokeballs!!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+        await asyncio.sleep(2)
+        await message.channel.send(PREFIX + "buy ball pokeball " + str(BUY_BALL_AMOUNT))
+        await asyncio.sleep(2)
+        await message.channel.send(client.last_catch_attempt)
+
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and  "Congratulations" in message.embeds[0].description and "You caught a" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         msg = message.embeds[0].description
         words = msg.split(' ')
         client.MONEY = client.MONEY + int(words[len(words)-2])
@@ -70,7 +91,7 @@ async def on_message(message):
         updateWebpage()
         return
 
-    if message.author.id == 627952266455941121 and "pokemon has escaped from" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "pokemon has escaped from" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         arr = client.last_catch_attempt.split(' ')
         escaped = ""
         for i in range(1, len(arr)):
@@ -83,7 +104,7 @@ async def on_message(message):
         updateWebpage()
         return
 
-    if message.author.id == 627952266455941121 and "like this is the wrong pokemon!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "like this is the wrong pokemon!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         bug = client.last_catch_attempt.split(' ')[1]
         print("Attemped to catch " + bug + " but the name was incorrect.")
         client.last_catch_attempt = ""
@@ -97,11 +118,7 @@ async def on_message(message):
 
 @client.command()
 async def ping(ctx):
-    start = time.perf_counter()
-    message = await ctx.send("Ping...")
-    end = time.perf_counter()
-    duration = (end - start) * 1000
-    await message.edit(content='Latency is {:.2f}ms'.format(duration))
+    await ctx.send('Pong! {0}'.format(round(client.latency, 1)))
 
 def updateWebpage():
     w = open("status.html", "w")
@@ -119,6 +136,14 @@ def updateWebpage():
     st = st[:-2] + "</p>"
     w.write(st)
     w.close()
+
+def determinePokeball():
+    if BALL_TYPE == "POKEBALL":
+        return "catch"
+    if BALL_TYPE == "GREATBALL":
+        return "gcatch"
+    if BALL_TYPE == "ULTRABALL":
+        return "ucatch"
 
 
     
