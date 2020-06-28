@@ -6,21 +6,23 @@ import json
 import asyncio
 import random
 import sys
+import guilds
 
 TOKEN = setup.TOK
 client = commands.Bot(command_prefix='!', self_bot=True, fetch_offline_members=False)
 client.remove_command('help')
-PREFIX = setup.PREFIX
+PREFIXES = guilds.prefixes
 DELAY = setup.DELAY
 SELFBOT_UID = setup.SELFBOT_UID
 OWNER_UID = setup.OWNER_UID
 BALL_TYPE = setup.BALL_TYPE
 BUY_BALL_AMOUNT = setup.BUY_BALL_AMOUNT
 client.MONEY = 0
-client.last_catch_attempt = ""
+client.last_catch_attempt = {}
 client.captured = []
 client.escape = []
 client.catch_type = ""
+
 
 
 
@@ -37,6 +39,12 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:   
         return
+    
+    #sys.exit("Pokeball Type Not Configured or Incorrectly Configured") 
+    if  message.author.id == 627952266455941121 and message.guild.id not in PREFIXES:
+        print(message.guild.name + " is not configured.")
+        return
+        
     
     if message.author.id != 627952266455941121:
         if message.author.id != OWNER_UID:
@@ -55,30 +63,31 @@ async def on_message(message):
                     name = "galarian " + name
             if name == "flabebe":
                 name = "flabébé"
-            await message.channel.send(PREFIX + client.catch_type + " " + name)
-            client.last_catch_attempt = PREFIX + client.catch_type + " " + name
+            await message.channel.send(PREFIXES[message.guild.id] + client.catch_type + " " + name)
+            client.last_catch_attempt[message.guild.id] = PREFIXES[message.guild.id] + client.catch_type + " " + name
             return
     except Exception as ex:
             pass
     
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any ultra balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         await asyncio.sleep(2)
-        await message.channel.send(PREFIX + "buy ball ultraball " + str(BUY_BALL_AMOUNT))
+        await message.channel.send(PREFIXES[message.guild.id] + "buy ball ultraball " + str(BUY_BALL_AMOUNT))
         await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt)
+        await message.channel.send(client.last_catch_attempt[message.guild.id])
 
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any great balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         await asyncio.sleep(2)
-        await message.channel.send(PREFIX + "buy ball greatball " + str(BUY_BALL_AMOUNT))
+        await message.channel.send(PREFIXES[message.guild.id] + "buy ball greatball " + str(BUY_BALL_AMOUNT))
         await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt)
+        await message.channel.send(client.last_catch_attempt[message.guild.id])
 
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any pokeballs!!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         await asyncio.sleep(2)
-        await message.channel.send(PREFIX + "buy ball pokeball " + str(BUY_BALL_AMOUNT))
+        await message.channel.send(PREFIXES[message.guild.id] + "buy ball pokeball " + str(BUY_BALL_AMOUNT))
         await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt)
+        await message.channel.send(client.last_catch_attempt[message.guild.id])
 
+    #alola/galar can be caught but won't show properly
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and  "Congratulations" in message.embeds[0].description and "You caught a" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         msg = message.embeds[0].description
         words = msg.split(' ')
@@ -92,12 +101,12 @@ async def on_message(message):
         return
 
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "pokemon has escaped from" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        arr = client.last_catch_attempt.split(' ')
+        arr = client.last_catch_attempt[message.guild.id].split(' ')
         escaped = ""
         for i in range(1, len(arr)):
             escaped = escaped + arr[i]
         print("Attemped to catch " + escaped.capitalize() + " but it escaped...")
-        client.last_catch_attempt = ""
+        client.last_catch_attempt[message.guild.id] = ""
         client.escape.append(escaped.capitalize())
         if random.randint(0,100) < 10:
             await message.channel.send("damnit i really wanted that one")
@@ -105,9 +114,9 @@ async def on_message(message):
         return
 
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "like this is the wrong pokemon!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        bug = client.last_catch_attempt.split(' ')[1]
+        bug = client.last_catch_attempt[message.guild.id].split(' ')[1]
         print("Attemped to catch " + bug + " but the name was incorrect.")
-        client.last_catch_attempt = ""
+        client.last_catch_attempt[message.guild.id] = ""
         if random.randint(0,100) < 10:
             await message.channel.send("wtf how")
         return
@@ -120,6 +129,7 @@ async def on_message(message):
 async def ping(ctx):
     await ctx.send('Pong! {0}'.format(round(client.latency, 1)))
 
+#Needs to be fixed
 def updateWebpage():
     w = open("status.html", "w")
     w.write("<!DOCTYPE html>" + "\n" + "<html>" + "\n" + "<head>" + "\n" + "<title>Autocatcher Summary</title>" + "\n" + "</head>" + "\n" + "<body>" + "\n" + "\n" + "<h1>Autocatcher Summary</h1>" + "\n")
