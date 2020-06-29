@@ -7,9 +7,10 @@ import asyncio
 import random
 import sys
 import guilds
+import checks
 
 TOKEN = setup.TOK
-client = commands.Bot(command_prefix='!', self_bot=True, fetch_offline_members=False)
+client = commands.Bot(command_prefix='sb!', self_bot=True, fetch_offline_members=False)
 client.remove_command('help')
 PREFIXES = guilds.prefixes
 DELAY = setup.DELAY
@@ -22,6 +23,8 @@ client.last_catch_attempt = {}
 client.captured = []
 client.escape = []
 client.catch_type = ""
+BOT_PREFIX = "sb!"
+
 
 
 
@@ -39,8 +42,24 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:   
         return
+
+    if message.content == BOT_PREFIX + "ping" and message.author.id == OWNER_UID:
+        await ping(message)
+        return
+
+    if message.content == BOT_PREFIX + "toggle":
+        channel = message.channel
+        await asyncio.sleep(1)
+        await channel.send("You want to toggle the autocatcher. Type 'YES' to continue.")
+
+        def check(m):
+            return m.content == 'YES' and m.channel == channel
+
+        msg = await client.wait_for('message', check=check, timeout=30.0)
+        await asyncio.sleep(2)
+        await channel.send('Autocatcher has been switched from NONE to NONE')
+        return
     
-    #sys.exit("Pokeball Type Not Configured or Incorrectly Configured") 
     if  message.author.id == 627952266455941121 and message.guild.id not in PREFIXES:
         print(message.guild.name + " is not configured.")
         return
@@ -126,8 +145,13 @@ async def on_message(message):
     await client.process_commands(message)
 
 @client.command()
-async def ping(ctx):
-    await ctx.send('Pong! {0}'.format(round(client.latency, 1)))
+async def ping(self, ctx):
+    print("invoked")
+    await ctx.send('pong')
+
+async def ping(message):
+    await message.channel.send('Pong! {0}'.format(round(client.latency, 1)))
+    return
 
 #Needs to be fixed
 def updateWebpage():
@@ -157,7 +181,7 @@ def determinePokeball():
 
 
     
-if BALL_TYPE != "POKEBALL" and BALL_TYPE != "GREATBALL" and BALL_TYPE != "ULTRABALL":
-    sys.exit("Pokeball Type Not Configured or Incorrectly Configured")  
-print("logging in")
+c = checks.Checker()
+c.verifyVals()  
+print("Logging in...")
 client.run(TOKEN, bot=False)
