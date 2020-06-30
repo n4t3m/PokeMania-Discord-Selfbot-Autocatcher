@@ -24,6 +24,7 @@ client.captured = []
 client.escape = []
 client.catch_type = ""
 BOT_PREFIX = "sb!"
+CAPTURE_CHANCE = setup.CAPTURE_CHANCE
 
 
 
@@ -82,6 +83,8 @@ async def on_message(message):
                     name = "galarian " + name
             if name == "flabebe":
                 name = "flabébé"
+            if random.randint(0,100) > CAPTURE_CHANCE:
+                return
             await message.channel.send(PREFIXES[message.guild.id] + client.catch_type + " " + name)
             client.last_catch_attempt[message.guild.id] = PREFIXES[message.guild.id] + client.catch_type + " " + name
             return
