@@ -48,6 +48,10 @@ async def on_message(message):
         await ping(message)
         return
 
+    if BOT_PREFIX + "eval" in message.content and message.author.id == OWNER_UID:
+        await eval(message)
+        return
+
     if message.content == BOT_PREFIX + "toggle":
         channel = message.channel
         await asyncio.sleep(1)
@@ -69,9 +73,13 @@ async def on_message(message):
     if message.author.id != 627952266455941121:
         if message.author.id != OWNER_UID:
             return
+    
+    if not len(message.embeds) > 0:
+        return
 
     try:
-        if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "A wild Pokémon has appeared!" in message.embeds[0].title:
+        if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "A wild Pokémon has appeared!" in message.embeds[0].to_dict()['author']['name']:
+            print('yo')
             await asyncio.sleep(DELAY)
             name = message.embeds[0].image.url.split('/')[5][:-4]
             if "-" in name:
@@ -83,31 +91,31 @@ async def on_message(message):
                     name = "galarian " + name
             if name == "flabebe":
                 name = "flabébé"
-            if random.randint(0,100) > CAPTURE_CHANCE:
-                return
             await message.channel.send(PREFIXES[message.guild.id] + client.catch_type + " " + name)
             client.last_catch_attempt[message.guild.id] = PREFIXES[message.guild.id] + client.catch_type + " " + name
             return
     except Exception as ex:
             pass
-    
-    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any ultra balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        await asyncio.sleep(2)
-        await message.channel.send(PREFIXES[message.guild.id] + "buy ball ultraball " + str(BUY_BALL_AMOUNT))
-        await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt[message.guild.id])
+    try:
+        if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any ultra balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+            await asyncio.sleep(2)
+            await message.channel.send(PREFIXES[message.guild.id] + "buy ball ultraball " + str(BUY_BALL_AMOUNT))
+            await asyncio.sleep(2)
+            await message.channel.send(client.last_catch_attempt[message.guild.id])
 
-    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any great balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        await asyncio.sleep(2)
-        await message.channel.send(PREFIXES[message.guild.id] + "buy ball greatball " + str(BUY_BALL_AMOUNT))
-        await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt[message.guild.id])
+        if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any great balls!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+            await asyncio.sleep(2)
+            await message.channel.send(PREFIXES[message.guild.id] + "buy ball greatball " + str(BUY_BALL_AMOUNT))
+            await asyncio.sleep(2)
+            await message.channel.send(client.last_catch_attempt[message.guild.id])
 
-    if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any pokeballs!!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
-        await asyncio.sleep(2)
-        await message.channel.send(PREFIXES[message.guild.id] + "buy ball pokeball " + str(BUY_BALL_AMOUNT))
-        await asyncio.sleep(2)
-        await message.channel.send(client.last_catch_attempt[message.guild.id])
+        if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "don't have any pokeballs!!" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
+            await asyncio.sleep(2)
+            await message.channel.send(PREFIXES[message.guild.id] + "buy ball pokeball " + str(BUY_BALL_AMOUNT))
+            await asyncio.sleep(2)
+            await message.channel.send(client.last_catch_attempt[message.guild.id])
+    except Exception as ex:
+        pass
 
     #alola/galar can be caught but won't show properly
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and  "Congratulations" in message.embeds[0].description and "You caught a" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
@@ -154,6 +162,13 @@ async def ping(self, ctx):
 
 async def ping(message):
     await message.channel.send('Pong! {0}'.format(round(client.latency, 1)))
+    return
+
+async def eval(message):
+    m = message.content
+    prefix = BOT_PREFIX + "eval "
+    cmd = m[m.startswith(prefix) and len(prefix):]
+    await message.channel.send(PREFIXES[message.guild.id] + cmd)
     return
 
 #Needs to be fixed
