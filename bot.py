@@ -34,7 +34,7 @@ CAPTURE_CHANCE = setup.CAPTURE_CHANCE
 async def on_ready():
     client.catch_type = determinePokeball()
     print('We have logged in as {0.user}'.format(client))
-    game = discord.Game("azunyan <3")
+    game = discord.Game("azusa thumb war me")
     await client.change_presence(status=discord.Status.online, activity=game)
 
 
@@ -66,7 +66,7 @@ async def on_message(message):
         return
     
     if  message.author.id == 627952266455941121 and message.guild.id not in PREFIXES:
-        print(message.guild.name + " is not configured.")
+        print(str(message.guild.id) + " is not configured.")
         return
         
     
@@ -79,9 +79,13 @@ async def on_message(message):
 
     try:
         if message.author.id == 627952266455941121 and len(message.embeds) > 0 and "A wild Pokémon has appeared!" in message.embeds[0].to_dict()['author']['name']:
-            print('yo')
+            #print('yo')
             await asyncio.sleep(DELAY)
             name = message.embeds[0].image.url.split('/')[5][:-4]
+            shiny = False
+            if "-shiny" in message.embeds[0].image.url.split('/')[4]:
+                print("Shiny Pokemon Has Spawned!")
+                shiny = True
             if "-" in name:
                 split = name.split('-')
                 name = split[0]
@@ -92,6 +96,8 @@ async def on_message(message):
             if name == "flabebe":
                 name = "flabébé"
             await message.channel.send(PREFIXES[message.guild.id] + client.catch_type + " " + name)
+            if shiny:
+                print("Shiny Pokemon Captured!!! Shiny " + name)
             client.last_catch_attempt[message.guild.id] = PREFIXES[message.guild.id] + client.catch_type + " " + name
             return
     except Exception as ex:
@@ -121,9 +127,9 @@ async def on_message(message):
     if message.author.id == 627952266455941121 and len(message.embeds) > 0 and  "Congratulations" in message.embeds[0].description and "You caught a" in message.embeds[0].description and str(SELFBOT_UID) in message.embeds[0].description:
         msg = message.embeds[0].description
         words = msg.split(' ')
-        client.MONEY = client.MONEY + int(words[len(words)-2])
-        print("Total Pokedollers Gained This Run: " + str(client.MONEY))
-        print("Captured a " + words[len(words)-5] + "!")
+        # client.MONEY = client.MONEY + int(words[len(words)-2])
+        # print("Total Pokedollers Gained This Run: " + str(client.MONEY))
+        print(msg[40:])
         client.captured.append(words[len(words)-5])
         if random.randint(0,100) < 10:
             await message.channel.send("yess I wanted to catch it so bad")

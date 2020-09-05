@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 2.1 9/4/2020
+
+### Added Support for Shiny Pokemon
+
+### Updates
+ - Shiny Pokemon will now be recognized by the bot.
+ - When a shiny Pokemon spawns (whether you catch it or not) it will be logged in the console.
+ - If you do manage to capture the shiny Pokemon, a special image will be printed to the console!
 
 ## Version 2.0 7/2/2020
 
